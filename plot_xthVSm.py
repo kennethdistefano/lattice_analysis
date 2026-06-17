@@ -36,7 +36,9 @@ def get_RGB_from_lat_config(infile):
     '''
     PURPOSE: create a single RGB value that is averaged over every Site
     
-    RETURNS: 1d array with 3 elements: [r, g, b]
+    RETURNS: 
+        - 1d array with 3 elements: [r, g, b]
+        - segregation index of type float
     '''
 
     # local vars
@@ -44,6 +46,7 @@ def get_RGB_from_lat_config(infile):
     red = np.array([1.0, 0.0, 0.0])
     black = np.array([0.0, 0.0, 0.0])
     blue = np.array([0.0, 0.0, 1.0])
+    seg_index_sum = 0
 
     # open file, get all data from file, close file
     with open(infile, 'r') as inf:
@@ -66,6 +69,9 @@ def get_RGB_from_lat_config(infile):
                 # returns list of [N_A, N_B, ... , N_i, K]
                 speciesPop = re.findall(r'-?\d+', Site)
                 speciesPop = np.array([int(i) for i in speciesPop])
+
+                # save product of R and S composition for segration index later
+                seg_index_sum+= (speciesPop[0]*speciesPop[1])/sum(speciesPop[:-1])**2
 
                 # determine which "last_lat_*.dat" color scheme
                 if PLOTTYPE == 'Ni':
@@ -91,9 +97,11 @@ def get_RGB_from_lat_config(infile):
             # update row 
             row += 1
 
+    # compute segregation index
+    seg_index = 1 - (1/(L*L))*seg_index_sum/(XTH*(1-XTH))
     
 
-    return rgb/(L*L)
+    return rgb/(L*L), seg_index
 
 
 def indicate_row(y, xi, xf, dx, dy, ax=None, **kwargs):
@@ -194,6 +202,7 @@ Dlist = []                              # list of diffusion rates
 horizontalD=np.zeros((len(desiredTimeSteps),len(M),2))# 3d arr 1st column is avg and 
                                             # 2nd column is standard deviation
                                             # of the binonal distribution
+segrationIndex = np.array([[float(i) for i in M], np.zeros(len(M))]).T  # len(M)x2
 # allDirs = glob.glob("Nth40/L20_mcs500_a0.25_s0.1_D0*_K80-*/")
 # # allDirs = glob.glob("L20_mcs500_a0.25_s0.1_D0*_K80-*/")
 # dirs=[]
@@ -283,8 +292,8 @@ for row, xth in enumerate(sorted(XTH, reverse=True)):
                 # create empty 3d array to hold data from file
                 lattice = np.zeros((2, L, L))
 
-                # get data
-                rgb = get_RGB_from_lat_config(df)
+                # get rgb data and computed segration index
+                rgb, segrationIndex[col, 1] = get_RGB_from_lat_config(df)
 
                 # save in 4d array
                 xthVSm[0,row, col] += rgb
@@ -324,7 +333,9 @@ xthVSm /= len(dfs)
 #                 horizontalD[i,col,1]=np.sqrt(horizontalD[i,col,0]*(1-horizontalD[i,col,0])/len(run[i]))
 
 
-
+# plot segration index as function of migration
+seg_fig, seg_ax = plt.subplots()
+seg_ax.plot(segrationIndex)
 
 # '''testing'''
 # print(botList, Dlist)
