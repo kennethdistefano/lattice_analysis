@@ -1,18 +1,25 @@
 '''
-AUTHOR: Kenneth Distefano, Feb 17 2025
+AUTHOR: Kenneth Distefano, June 2026
 
 REPOSITORY: 
 
 PURPOSE: 
-create a xth versus m heatmap to show which parameters tend towards fixation to understand an eradication mechanism. Operations include: 
+create two xth versus m heatmaps to show 
+    1) which params tend towards fixation to understand an eradication mechanism. 
+    2) segration index
+Operations include: 
     - parsing all data files within their respective directories;
     - determing how many runs result in S fixation, coexistence or 
         R fixation;
     - plot results.
 
+NOTE to self:
+    ~ need to create general heatmap
+    ~ clean up commented out portions
+
 
 MIT LICENSE:
-Copyright <2025> <Kenneth Distefano>
+Copyright <2026> <Kenneth Distefano>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -196,13 +203,13 @@ colors = cmap(np.linspace(0,0.75,len(desiredTimeSteps)))# max at 0.75 to avoid y
 # nCompThresh = len(XTH)
 # nD = len(M)
 xthVSm = np.zeros((len(desiredTimeSteps), len(XTH), len(M), 3)) # rgb vals for hmap
+segIndexVSm = np.zeros((len(desiredTimeSteps), len(XTH), len(M))) # seg index
 dirsDict = {}                           # dict to hold all data to help with parsing
 botList = []                            # list of bottlenecks K_+/K_-
 Dlist = []                              # list of diffusion rates
 horizontalD=np.zeros((len(desiredTimeSteps),len(M),2))# 3d arr 1st column is avg and 
                                             # 2nd column is standard deviation
                                             # of the binonal distribution
-segrationIndex = np.array([[float(i) for i in M], np.zeros(len(M))]).T  # len(M)x2
 # allDirs = glob.glob("Nth40/L20_mcs500_a0.25_s0.1_D0*_K80-*/")
 # # allDirs = glob.glob("L20_mcs500_a0.25_s0.1_D0*_K80-*/")
 # dirs=[]
@@ -293,7 +300,7 @@ for row, xth in enumerate(sorted(XTH, reverse=True)):
                 lattice = np.zeros((2, L, L))
 
                 # get rgb data and computed segration index
-                rgb, segrationIndex[col, 1] = get_RGB_from_lat_config(df)
+                rgb, segIndexVSm[0,row,col] = get_RGB_from_lat_config(df)
 
                 # save in 4d array
                 xthVSm[0,row, col] += rgb
@@ -302,6 +309,10 @@ for row, xth in enumerate(sorted(XTH, reverse=True)):
 
 # average rgb value (divide by number of realizations)
 xthVSm /= len(dfs)
+
+'''testing'''
+print('segration index:')
+print(segIndexVSm)
 
 
 # # iterate through dictionary of dictionaries
@@ -333,9 +344,6 @@ xthVSm /= len(dfs)
 #                 horizontalD[i,col,1]=np.sqrt(horizontalD[i,col,0]*(1-horizontalD[i,col,0])/len(run[i]))
 
 
-# plot segration index as function of migration
-seg_fig, seg_ax = plt.subplots()
-seg_ax.plot(segrationIndex)
 
 # '''testing'''
 # print(botList, Dlist)
@@ -372,6 +380,11 @@ print(f'yTickLoc= {yTickLoc}')
 for i, ts in enumerate(desiredTimeSteps):
     # create heat map
     fig, ax = plt.subplots(figsize=(9,6))
+    fig_segIndx, ax_segIndx = plt.subplots(figsize=(9,6))
+
+    # plot segration index
+    img_segIndx = ax_segIndx.imshow(segIndexVSm[i], vmin=0, vmax=1, extent=myExtent,
+                                    aspect='auto')
 
     # plot 2d array
     if PLOTTYPE == 'x':
@@ -388,30 +401,26 @@ for i, ts in enumerate(desiredTimeSteps):
     # ax.plot(np.insert(xTickLoc[1:],0,dx/2), newTheoBotNeck,
     #         color='gold', linewidth=WIDTH+2)
 
-    # plot horizontal line denoting a broken axis
-    ax.vlines(xTickLoc[0]+(dx/2), ymin=myExtent[2], ymax=myExtent[3], colors='white',
-              linewidth=WIDTH, linestyles='dashed')
+    # loop through both heat maps
+    for a in [ax, ax_segIndx]:
+        
+        # plot horizontal line denoting a broken axis
+        a.vlines(xTickLoc[0]+(dx/2), ymin=myExtent[2], ymax=myExtent[3], 
+                 colors='white',
+                 linewidth=WIDTH, linestyles='dashed')
     
-    # # create a rectangle around entire row to indicate the bottleneck of interest
-    # # as of Dec 2024, indicate_row() is depreciated --> replaced by horizontal line
-    # if desiredBotRatio:
-    #     # indicate_row(yTickLoc[botList.index(desiredBotRatio)],
-    #     #              myExtent[0], myExtent[1], dx, dy,
-    #     #              color='grey', linewidth=WIDTH, linestyle='--')
-    #     ax.hlines(yTickLoc[botList.index(desiredBotRatio)], xmin=myExtent[0],
-    #               xmax=myExtent[1], colors='grey', linewidth=WIDTH, linestyle='-')
 
-    # format plot
-    if LABELS:
-        ax.set_xlabel('$m$', fontsize=TEXTSIZE)
-        ax.set_ylabel('$x_{th}$', fontsize=TEXTSIZE)
+        # format plot
+        if LABELS:
+            a.set_xlabel('$m$', fontsize=TEXTSIZE)
+            a.set_ylabel('$x_{th}$', fontsize=TEXTSIZE)
 
-    if TITLE:
-        ax.set_title(f'($\\nu$= {NU}, $\\delta$= {DELTA}) K$\in[{K[0]}, {K[-1]}]$ t={ts}', fontsize=TEXTSIZE)
+        if TITLE:
+            a.set_title(f'($\\nu$= {NU}, $\\delta$= {DELTA}) K$\in[{K[0]}, {K[-1]}]$ t={ts}', fontsize=TEXTSIZE)
 
-    # increase the thickness of figure border
-    for spine in ['left', 'right', 'top', 'bottom']:    # incr border
-        ax.spines[spine].set_linewidth(WIDTH)
+        # increase the thickness of figure border
+        for spine in ['left', 'right', 'top', 'bottom']:    # incr border
+            a.spines[spine].set_linewidth(WIDTH)
     
     ax.set_ylim(bottom=myExtent[2], top=myExtent[3])    # avoid shrinking heat map
     ax.set_xticks(xTickLoc)
