@@ -422,44 +422,56 @@ for i, ts in enumerate(desiredTimeSteps):
         for spine in ['left', 'right', 'top', 'bottom']:    # incr border
             a.spines[spine].set_linewidth(WIDTH)
     
-    ax.set_ylim(bottom=myExtent[2], top=myExtent[3])    # avoid shrinking heat map
-    ax.set_xticks(xTickLoc)
-    ax.set_yticks(yTickLoc)
-    ax.tick_params(axis='both', which='major', labelsize=TEXTSIZE-3, width=WIDTH,
-                    length=LENGTH)
+        a.set_ylim(bottom=myExtent[2], top=myExtent[3])    # avoid shrinking heat map
+        a.set_xticks(xTickLoc)
+        a.set_yticks(yTickLoc)
+        a.tick_params(axis='both', which='major', labelsize=TEXTSIZE-3, width=WIDTH,
+                        length=LENGTH)
 
-    if NOTICKLABELS:
-        ax.set_xticklabels([])
-        ax.set_yticklabels([])
+        if NOTICKLABELS:
+            a.set_xticklabels([])
+            a.set_yticklabels([])
 
-    else:
-        xTickLabels = [f"$10^{{{i:.0f}}}$" for i in np.arange(-5,1.5,0.5)] # no deci
-        # yTickLabels = XTH
+        else:
+            xTickLabels = [f"$10^{{{i:.0f}}}$" for i in np.arange(-5,1.5,0.5)] # no deci
+            # yTickLabels = XTH
 
-        # # remove unnecessary decimals to only select y tick labels
-        # for i,y in enumerate(yTickLabels):
-        #     if i>0 and i%2 == 0:
-        #         yTickLabels[i] = int(y)
+            # # remove unnecessary decimals to only select y tick labels
+            # for i,y in enumerate(yTickLabels):
+            #     if i>0 and i%2 == 0:
+            #         yTickLabels[i] = int(y)
 
-        ax.set_xticklabels([f'{float(M[0]):.0f}']+xTickLabels)
-        ax.set_yticklabels(XTH)
+            a.set_xticklabels([f'{float(M[0]):.0f}']+xTickLabels)
+            a.set_yticklabels(XTH)
 
-        # set every other label to be not visible
-        for xl in ax.xaxis.get_ticklabels()[2::2]:
-            xl.set_visible(False)
-            
-        # for yl in ax.yaxis.get_ticklabels()[1::2]:
-        #     yl.set_visible(False)
+            # set every other label to be not visible
+            for xl in a.xaxis.get_ticklabels()[2::2]:
+                xl.set_visible(False)
+                
+            # for yl in ax.yaxis.get_ticklabels()[1::2]:
+            #     yl.set_visible(False)
 
 
     if CBAR:
+        # fixation heat map
         cbar = fig.colorbar(mappable=img, ax=ax, ticks=[0, 1])
         cbar.ax.tick_params(labelsize=TEXTSIZE, width=WIDTH, length=LENGTH)
         cbar.ax.set_title('$x=N_R/N$',fontsize=TEXTSIZE, pad=TEXTSIZE-8)
         cbar.outline.set_linewidth(WIDTH)
 
+        # segration index heat map
+        cbar_segIndx = fig_segIndx.colorbar(mappable=img_segIndx, ax=ax_segIndx,
+                                            ticks=[0, 1])
+        cbar_segIndx.ax_segIndx.tick_params(labelsize=TEXTSIZE, width=WIDTH,
+                                            length=LENGTH)
+        cbar_segIndx.ax_segIndx.set_title('$\\langle \mathcal{S} \\rangle$',
+                                          fontsize=TEXTSIZE,
+                                          pad=TEXTSIZE-8)
+        cbar_segIndx.outline.set_linewidth(WIDTH)
+
 
     fig.tight_layout()
+    fig_segIndx.tight_layout()
     
     # detemine output file name depending on parameters
     # for simplicity, this only works if the -notl flag was included
