@@ -39,7 +39,7 @@ import re                               # to parse each lattice site
 from matplotlib.colors import LinearSegmentedColormap   # create cmap for x plot type
 
 ################################################ definitions
-def get_RGB_from_lat_config(infile):
+def get_RGB_from_lat_config(infile, comp_thresh):
     '''
     PURPOSE: create a single RGB value that is averaged over every Site
     
@@ -105,7 +105,7 @@ def get_RGB_from_lat_config(infile):
             row += 1
 
     # compute segregation index
-    seg_index = 1 - (1/(L*L))*seg_index_sum/(XTH*(1-XTH))
+    seg_index = 1 - (1/(L*L))*seg_index_sum/(comp_thresh*(1-comp_thresh))
     
 
     return rgb/(L*L), seg_index
@@ -300,7 +300,7 @@ for row, xth in enumerate(sorted(XTH, reverse=True)):
                 lattice = np.zeros((2, L, L))
 
                 # get rgb data and computed segration index
-                rgb, segIndexVSm[0,row,col] = get_RGB_from_lat_config(df)
+                rgb, segIndexVSm[0,row,col] = get_RGB_from_lat_config(df, xth)
 
                 # save in 4d array
                 xthVSm[0,row, col] += rgb
