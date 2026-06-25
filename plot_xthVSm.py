@@ -16,6 +16,8 @@ Operations include:
 NOTE to self:
     ~ need to create general heatmap
     ~ clean up commented out portions
+    ~ need to update color bar for segregation index
+    ~ save either aveComp, segIndex, or both heat maps
 
 
 MIT LICENSE:
@@ -159,6 +161,8 @@ parser.add_argument('-m', '--migs', nargs='*', type=str,
                     help='(optional flag) migration values. default is [0, 10^-5, 10^-4.5, ..., 10^-1] of type string to avoid issues parsing data files.')
 parser.add_argument('-save', '--saveFigs', default=False, action='store_true',
                     help='(optional flag) include this flag to save figure(s). default is to show to screen.')
+# parser.add_argument('-save', '--saveFigs', choices=['aveComp', 'segIndex', 'both'],
+#                     help='(optional flag) save aveComp, segIndex, or both heat maps. default is to show to screen.')
 parser.add_argument('-c', '--colorbar', default=False, action='store_true',
                     help='(optional flag) include the color bar with heat map')
 parser.add_argument("-nol", "--labels", default=True, action='store_false',
@@ -487,13 +491,12 @@ for i, ts in enumerate(desiredTimeSteps):
         ofnames.append(f'xth/segIndex_{DFTYPE}_L{L}_mcs{MCS}_K{K[0]}-{K[-1]}_nu{NU}_delta{DELTA}_ts{ts}_noLabels.png')
 
     # save
-    for ofname in ofnames:
-        if SAVE:
-            print(f'saved {ofname}')
-            fig.savefig(ofname)
-        else:
-            print(f'showed {ofname}')
-            plt.show()
+    if SAVE:
+        print(f'saved {ofnames[-1]}')
+        fig_segIndx.savefig(ofnames[-1])
+    else:
+        print(f'showing {ofnames}')
+        plt.show()
 
 
 '''testing'''
