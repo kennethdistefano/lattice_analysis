@@ -476,17 +476,24 @@ for i, ts in enumerate(desiredTimeSteps):
     # detemine output file name depending on parameters
     # for simplicity, this only works if the -notl flag was included
     # doesn't consider of ticklabels or colorbar are desired
+    ofnames = []
     if LABELS:
-        ofname = f'xth/xthVSm_{DFTYPE}'+(f'-{PLOTTYPE}' if PLOTTYPE=='x' else '')+f'_L{L}_mcs{MCS}_K{K[0]}-{K[-1]}_nu{NU}_delta{DELTA}_ts{ts}.png'
+        ofnames.append(f'xth/xthVSm_{DFTYPE}'+(f'-{PLOTTYPE}' if PLOTTYPE=='x' else '')+f'_L{L}_mcs{MCS}_K{K[0]}-{K[-1]}_nu{NU}_delta{DELTA}_ts{ts}.png')
+        
+        ofnames.append(f'xth/segIndex_{DFTYPE}_L{L}_mcs{MCS}_K{K[0]}-{K[-1]}_nu{NU}_delta{DELTA}_ts{ts}.png')
     else:
-        ofname = f'xth/xthVSm_{DFTYPE}'+(f'-{PLOTTYPE}' if PLOTTYPE=='x' else '')+f'_L{L}_mcs{MCS}_K{K[0]}-{K[-1]}_nu{NU}_delta{DELTA}_ts{ts}_noLabels.png'
+        ofnames.append(f'xth/xthVSm_{DFTYPE}'+(f'-{PLOTTYPE}' if PLOTTYPE=='x' else '')+f'_L{L}_mcs{MCS}_K{K[0]}-{K[-1]}_nu{NU}_delta{DELTA}_ts{ts}_noLabels.png')
+
+        ofnames.append(f'xth/segIndex_{DFTYPE}_L{L}_mcs{MCS}_K{K[0]}-{K[-1]}_nu{NU}_delta{DELTA}_ts{ts}_noLabels.png')
 
     # save
-    print(ofname)
-    if SAVE:
-        fig.savefig(ofname)
-    else:
-        plt.show()
+    for ofname in ofnames:
+        if SAVE:
+            print(f'saved {ofname}')
+            fig.savefig(ofname)
+        else:
+            print(f'showed {ofname}')
+            plt.show()
 
 
 '''testing'''
