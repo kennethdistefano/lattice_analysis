@@ -137,20 +137,6 @@ def indicate_row(y, xi, xf, dx, dy, ax=None, **kwargs):
 # create parser
 parser = argparse.ArgumentParser(description="create a heat map that shows the fraction of simulations that result in S fixation, coexistance, or R fixation at a particular time step.")
 
-parser.add_argument("-n", "--nu",
-                    help='nu: environmental switching rate')
-parser.add_argument("-d", "--delta",
-                    help='delta: environmental bias value')
-# parser.add_argument("-b", "--bottleNeck", type=float,
-#                     help='desired bottle neck ratio')
-parser.add_argument('-mcs', '--monteCarloSteps', type=int,
-                    help='number of total Monte Carlo Steps, used to correctly identify \'num_den_*.dat\' files.')
-parser.add_argument('-ts', "--timeSteps", type=int, nargs='*',
-                    help='deisred time step(s)')
-parser.add_argument('-df', '--dataFileType', choices=['num', 'last'],
-                    help='type of data file to parse: \"num_*.dat\" or \"last_*.dat\"')
-parser.add_argument('-p', '--plotType', choices=['x', 'Ni'],
-                    help='type of plot that computes x=N_R/N per site or just uses N_i. Intended to be used with data file type \"last_lat_*.dat\"')
 parser.add_argument('-xth', "--threshold", type=float, nargs='*', 
                     default=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
                     help='(optional flag) x threshold. default is [0.1, ..., 0.9].')
@@ -175,6 +161,20 @@ parser.add_argument('-K', '--carryCaps', type=int, nargs='*', default=[80, 1000]
                     help='(optional flag) value for the harsh and mild carrying capacity. Default is [80, 1000]')
 parser.add_argument('-L', '--latSideLength', type=int, default=10,
                     help='(optional flag) side length of lattice. default=10')
+parser.add_argument("-n", "--nu",
+                    help='nu: environmental switching rate')
+parser.add_argument("-d", "--delta",
+                    help='delta: environmental bias value')
+# parser.add_argument("-b", "--bottleNeck", type=float,
+#                     help='desired bottle neck ratio')
+parser.add_argument('-mcs', '--monteCarloSteps', type=int,
+                    help='number of total Monte Carlo Steps, used to correctly identify \'num_den_*.dat\' files.')
+parser.add_argument('-ts', "--timeSteps", type=int, nargs='*',
+                    help='deisred time step(s)')
+parser.add_argument('-df', '--dataFileType', choices=['num', 'last'],
+                    help='type of data file to parse: \"num_*.dat\" or \"last_*.dat\"')
+parser.add_argument('-p', '--plotType', choices=['x', 'Ni'],
+                    help='type of plot that computes x=N_R/N per site or just uses N_i. Intended to be used with data file type \"last_lat_*.dat\"')
 
 
 # save command line arguments
@@ -317,6 +317,11 @@ for row, xth in enumerate(sorted(XTH, reverse=True)):
 
 # average rgb value (divide by number of realizations)
 xthVSm /= len(dfs)
+
+# average segregation index (divide by number of realizations)
+'''testing'''
+print(f'\nsegration index')
+print(segIndexVSm)
 
 
 # # iterate through dictionary of dictionaries
