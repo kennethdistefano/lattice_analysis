@@ -151,7 +151,7 @@ def save_avgSegIndex(nestedList):
         for col, m in enumerate(M):
 
             # compute average across realizations
-            avgSegIndexWithStderr[row]=compute_avg_stderr(nestedList[row][col],float(m))
+            avgSegIndexWithStderr[col]=compute_avg_stderr(nestedList[row][col],float(m))
 
         # save
         '''testing'''
@@ -197,7 +197,7 @@ def compute_avg_stderr(dataList, m):
     stderr = np.std(dataList)/np.sqrt(len(dataList))
 
     '''testing'''
-    print(f'\twithin compute_avg_stderr():\n{dataList}\nm= {m}\tavg= {avg}\tstderr= {stderr}')
+    print(f'\twithin compute_avg_stderr():\n\t{dataList}\n\tm= {m}\tavg= {avg}\tstderr= {stderr}')
     
 
     return np.array([m, avg, stderr])
