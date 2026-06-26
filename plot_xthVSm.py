@@ -306,6 +306,10 @@ for row, xth in enumerate(sorted(XTH, reverse=True)):
                 # get rgb data and computed segration index
                 rgb, segIndexVSm[0,row,col] = get_RGB_from_lat_config(df, xth)
 
+                '''testing'''
+                print(f'segration index from {df}:')
+                print(segIndexVSm)
+
                 # save in 4d array
                 xthVSm[0,row, col] += rgb
 
@@ -313,10 +317,6 @@ for row, xth in enumerate(sorted(XTH, reverse=True)):
 
 # average rgb value (divide by number of realizations)
 xthVSm /= len(dfs)
-
-'''testing'''
-print('segration index:')
-print(segIndexVSm)
 
 
 # # iterate through dictionary of dictionaries
