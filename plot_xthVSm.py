@@ -176,7 +176,7 @@ def save_avgSegIndex_toMatFile(data2save, xth):
 
     # save 
     scipy.io.savemat(outputName,
-                     {"coexistSites":-1*np.ones(len(M), 3),
+                     {"coexistSites":-1*np.ones((len(M), 3)),
                       "allSites":data2save})
 
     return
@@ -195,6 +195,9 @@ def compute_avg_stderr(dataList, m):
     # local vars
     avg = np.average(dataList)
     stderr = np.std(dataList)/np.sqrt(len(dataList))
+
+    '''testing'''
+    print(f'\twithin compute_avg_stderr():\n{dataList}\nm= {m}\tavg= {avg}\tstderr= {stderr}')
     
 
     return np.array([m, avg, stderr])
