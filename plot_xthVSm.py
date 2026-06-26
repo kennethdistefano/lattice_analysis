@@ -39,6 +39,7 @@ import argparse
 import matplotlib as mpl                # for sequential color map
 import re                               # to parse each lattice site
 from matplotlib.colors import LinearSegmentedColormap   # create cmap for x plot type
+import scipy.io
 
 ################################################ definitions
 def get_RGB_from_lat_config(infile, comp_thresh):
@@ -131,7 +132,72 @@ def indicate_row(y, xi, xf, dx, dy, ax=None, **kwargs):
 
     return rect
 
+def save_avgSegIndex(nestedList):
+    '''
+    PURPOSE:
+        - compute average and standard error of segregation index across realizations
+        - save data as *.mat file for exterior MATLAB plotting script
+    '''
+    # local vars
+    
 
+    # loop through composition thresholds
+    for row, xth in enumerate(XTH):
+
+        # store data
+        avgSegIndexWithStderr = np.zeros((len(M), 3))
+        
+        # loop through migrations
+        for col, m in enumerate(M):
+
+            # compute average across realizations
+            avgSegIndexWithStderr[row]=compute_avg_stderr(nestedList[row][col],float(m))
+
+        # save
+        '''testing'''
+        print(f'within save_avgSegIndex():\txth={xth}\n{avgSegIndexWithStderr}')
+        save_avgSegIndex_toMatFile(avgSegIndexWithStderr, xth)
+
+    return
+
+def save_avgSegIndex_toMatFile(data2save, xth):
+    '''
+    PURPOSE:
+
+    passed arguments:
+        data2save: len(M)x3 np.array
+            - 1st column contains migration rates
+            - 2nd col is averaged segration index across realizations
+            - 3rd col is standard error of segration index across realizations
+    '''
+
+    # create output name
+    outputName = f'xth{xth}/segIndex_versus_D_last_L{L}_mcs{MCS}_a0.25_s0.1_K{K[0]}-{K[-1]}_xth{xth}_nu{NU}_delta{DELTA}.mat'
+
+    # save 
+    scipy.io.savemat(outputName,
+                     {"coexistSites":-1*np.ones(len(M), 3),
+                      "allSites":data2save})
+
+    return
+
+def compute_avg_stderr(dataList, m):
+    '''
+    PURPOSE:
+
+    passed arguments:
+        - dataList: list of data of length number of realizations for a particular 
+            composition threshold and migration rate
+
+        - m: migration rate. Needs to be of type float.
+    
+    '''
+    # local vars
+    avg = np.average(dataList)
+    stderr = np.std(dataList)/np.sqrt(len(dataList))
+    
+
+    return np.array([m, avg, stderr])
 
 ################################################ main
 # create parser
@@ -307,10 +373,6 @@ for row, xth in enumerate(sorted(XTH, reverse=True)):
                 # get rgb data and computed segration index
                 rgb, segIndex = get_RGB_from_lat_config(df, xth)
 
-                '''testing'''
-                print(f'segration index from {df}:')
-                print(segIndex)
-
                 # save in 4d array
                 xthVSm[0,row, col] += rgb
 
@@ -332,6 +394,7 @@ print(f'\nsegration index')
 print(avgSegIndexVSm)
 
 # save *.mat files for MATLAB plotting script
+save_avgSegIndex(allSegIndexVSm)
 
 
 # # iterate through dictionary of dictionaries
