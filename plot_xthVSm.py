@@ -207,7 +207,8 @@ colors = cmap(np.linspace(0,0.75,len(desiredTimeSteps)))# max at 0.75 to avoid y
 # nCompThresh = len(XTH)
 # nD = len(M)
 xthVSm = np.zeros((len(desiredTimeSteps), len(XTH), len(M), 3)) # rgb vals for hmap
-segIndexVSm = np.zeros((len(desiredTimeSteps), len(XTH), len(M))) # seg index
+avgSegIndexVSm = np.zeros((len(desiredTimeSteps), len(XTH), len(M))) # avg seg index
+allSegIndexVSm = [[[] for c in range(len(M))] for r in range(len(XTH))] # all segindx
 dirsDict = {}                           # dict to hold all data to help with parsing
 botList = []                            # list of bottlenecks K_+/K_-
 Dlist = []                              # list of diffusion rates
@@ -304,14 +305,20 @@ for row, xth in enumerate(sorted(XTH, reverse=True)):
                 lattice = np.zeros((2, L, L))
 
                 # get rgb data and computed segration index
-                rgb, segIndexVSm[0,row,col] = get_RGB_from_lat_config(df, xth)
+                rgb, segIndex = get_RGB_from_lat_config(df, xth)
 
                 '''testing'''
                 print(f'segration index from {df}:')
-                print(segIndexVSm)
+                print(segIndex)
 
                 # save in 4d array
                 xthVSm[0,row, col] += rgb
+
+                # save in 3d array
+                avgSegIndexVSm[0,row,col] += segIndex
+
+                # save segregation index into list to save in *.mat file later
+                allSegIndexVSm[row][col].append(segIndex)
 
 
 
@@ -319,9 +326,12 @@ for row, xth in enumerate(sorted(XTH, reverse=True)):
 xthVSm /= len(dfs)
 
 # average segregation index (divide by number of realizations)
+avgSegIndexVSm /= len(dfs)
 '''testing'''
 print(f'\nsegration index')
-print(segIndexVSm)
+print(avgSegIndexVSm)
+
+# save *.mat files for MATLAB plotting script
 
 
 # # iterate through dictionary of dictionaries
@@ -392,7 +402,7 @@ for i, ts in enumerate(desiredTimeSteps):
     fig_segIndx, ax_segIndx = plt.subplots(figsize=(9,6))
 
     # plot segration index
-    img_segIndx = ax_segIndx.imshow(segIndexVSm[i], vmin=0, vmax=1, extent=myExtent,
+    img_segIndx = ax_segIndx.imshow(avgSegIndexVSm[i], vmin=0, vmax=1, extent=myExtent,
                                     aspect='auto')
 
     # plot 2d array
