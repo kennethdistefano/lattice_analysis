@@ -154,8 +154,8 @@ def save_avgSegIndex(nestedList):
             avgSegIndexWithStderr[col]=compute_avg_stderr(nestedList[row][col],float(m))
 
         # save
-        '''testing'''
-        print(f'within save_avgSegIndex():\txth={xth}\n{avgSegIndexWithStderr}')
+        # '''testing'''
+        # print(f'within save_avgSegIndex():\txth={xth}\n{avgSegIndexWithStderr}')
         save_avgSegIndex_toMatFile(avgSegIndexWithStderr, xth)
 
     return
@@ -196,8 +196,8 @@ def compute_avg_stderr(dataList, m):
     avg = np.average(dataList)
     stderr = np.std(dataList)/np.sqrt(len(dataList))
 
-    '''testing'''
-    print(f'\twithin compute_avg_stderr():\n\t{dataList}\n\tm= {m}\tavg= {avg}\tstderr= {stderr}')
+    # '''testing'''
+    # print(f'\twithin compute_avg_stderr():\n\t{dataList}\n\tm= {m}\tavg= {avg}\tstderr= {stderr}')
     
 
     return np.array([m, avg, stderr])
