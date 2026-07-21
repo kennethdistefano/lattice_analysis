@@ -522,7 +522,7 @@ for i, ts in enumerate(desiredTimeSteps):
             if len(M) == 14:
                 xTickLabels = [f"$10^{{{i:.0f}}}$" for i in np.arange(-5,1.5,0.5)]
             elif len(M) == 10:
-                xTickLabels = [f"$10^{{{i:.0f}}}$" for i in np.arange(-5,-1.5,0.5)]
+                xTickLabels = [f"$10^{{{i:.0f}}}$" for i in np.arange(-5,-0.5,0.5)]
             else:
                 print(f'WARNING!! Double-check desired migration values; Could not create xTickLabels.\nm= {M}')
                 exit(1)
