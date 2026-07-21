@@ -468,8 +468,8 @@ for i, ts in enumerate(desiredTimeSteps):
     fig_segIndx, ax_segIndx = plt.subplots(figsize=(9,6))
 
     # plot segration index
-    img_segIndx = ax_segIndx.imshow(avgSegIndexVSm[i], vmin=0, vmax=1, extent=myExtent,
-                                    aspect='auto')
+    img_segIndx = ax_segIndx.imshow(avgSegIndexVSm[i], vmin=0, vmax=1,
+                                    extent=myExtent, aspect='auto', cmap='Greys')
 
     # plot 2d array
     if PLOTTYPE == 'x':
