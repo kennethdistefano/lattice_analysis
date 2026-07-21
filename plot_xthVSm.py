@@ -204,7 +204,7 @@ def compute_avg_stderr(dataList, m):
 
 ################################################ main
 # create parser
-parser = argparse.ArgumentParser(description="create a heat map that shows the fraction of simulations that result in S fixation, coexistance, or R fixation at a particular time step.")
+parser = argparse.ArgumentParser(description="create two xth versus m heatmaps to show (1) which params tend towards fixation to understand an eradication mechanism and (2) the computed segration index. Operations include: (i) parsing all data files within their respective directories; (ii) determing how many runs result in S fixation, coexistence or R fixation; (iii) plot results.")
 
 parser.add_argument('-xth', "--threshold", type=float, nargs='*', 
                     default=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
@@ -518,7 +518,15 @@ for i, ts in enumerate(desiredTimeSteps):
             a.set_yticklabels([])
 
         else:
-            xTickLabels = [f"$10^{{{i:.0f}}}$" for i in np.arange(-5,1.5,0.5)] # no deci
+            # check if migration values go until 10^1 (const env) or 10^-1 (dyn env)
+            if len(M) == 14:
+                xTickLabels = [f"$10^{{{i:.0f}}}$" for i in np.arange(-5,1.5,0.5)]
+            elif len(M) == 10:
+                xTickLabels = [f"$10^{{{i:.0f}}}$" for i in np.arange(-5,-1.5,0.5)]
+            else:
+                print(f'WARNING!! Double-check desired migration values; Could not create xTickLabels.\nm= {M}')
+                exit(1)
+
             # yTickLabels = XTH
 
             # # remove unnecessary decimals to only select y tick labels
