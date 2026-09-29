@@ -202,6 +202,57 @@ def compute_avg_stderr(dataList, m):
 
     return np.array([m, avg, stderr])
 
+
+def compute_critical_mig(switchSpeed, xtickloc, ytickloc):
+    '''
+    PURPOSE:
+        - compute the critical migration as the xthreshold varies
+    
+    PASSED ARGUMENTS:
+        - switchSpeed is of type str: either 'slow' or 'fast'
+        - xtickloc is of type float and is the location of the x tick marks
+        - ytickloc is of type float and is the location of the y tick marks
+
+    RETURNS:
+        - xcrit is a nested list of xy pairs to plot on top of color plot [[x1,y1], ]
+    '''
+    xcritDict = {}
+    
+    # match log_10(m) values, i.e. -1, -1.5, -2, ..., to untransformed x tick locs
+    for i,m in enumerate(M):
+        # check if zero
+        if m == '0':
+            xcritDict[0] = xtickloc[i]
+        else:
+            xcritDict[ round(np.log10(float(m)), 1) ] = xtickloc[i]
+
+    '''testing'''
+    print(f'xcritDict= {xcritDict}')
+    
+
+    # determine switchng speed
+    xcrit = []
+    if switchSpeed == 'slow':
+        values = [-1, -2, -2.5, -3, -2, -1.5, -1, -1, -1]
+
+    elif switchSpeed == 'fast':
+        if DELTA == 0.75:
+            values = [-4, 0, 0, 0, 0, 0, 0, -4.5, -2.5]
+        elif DELTA == 0:
+            values = [-2, -3, -4, -4.5, -3.5, -3, -2, -1.5, -1]
+        elif DELTA == -0.75:
+            values = [-1.5, -2, -3,-3, -2, -1.5, -1, -1, -1]
+        else:
+            xcrit = None
+
+    else:
+        xcrit = None
+
+    for i, val in enumerate(values):
+        xcrit.append([xcritDict[val], ytickloc[i]])
+
+    return xcrit
+
 ################################################ main
 # create parser
 parser = argparse.ArgumentParser(description="create two xth versus m heatmaps to show (1) which params tend towards fixation to understand an eradication mechanism and (2) the computed segration index. Operations include: (i) parsing all data files within their respective directories; (ii) determing how many runs result in S fixation, coexistence or R fixation; (iii) plot results.")
@@ -230,6 +281,9 @@ parser.add_argument('-K', '--carryCaps', type=int, nargs='*', default=[80, 1000]
                     help='(optional flag) value for the harsh and mild carrying capacity. Default is [80, 1000]')
 parser.add_argument('-L', '--latSideLength', type=int, default=10,
                     help='(optional flag) side length of lattice. default=10')
+parser.add_argument('-xcrit', '--xcritical', type=str, 
+                    choices=['slow', 'fast'],
+                    help='(optional flag) plot critical xth line over color map.')
 parser.add_argument("-n", "--nu",
                     help='nu: environmental switching rate')
 parser.add_argument("-d", "--delta",
@@ -264,6 +318,7 @@ L = args.latSideLength                  # lattice side length
 MCS = args.monteCarloSteps              # number of monte carlo steps
 DFTYPE = args.dataFileType              # type of data file to parse
 PLOTTYPE = args.plotType                # compute x or use N_i for each site
+XCRIT = args.xcritical                  # type str: slow, inter, fast
 TEXTSIZE = 25                           # size for text w/n plot
 WIDTH = 3                               # size for tick and spine width
 LENGTH = 8                              # ticksize length
@@ -478,6 +533,13 @@ for i, ts in enumerate(desiredTimeSteps):
         xcmap = LinearSegmentedColormap.from_list(mycmap_name, blackBlue)
         img = ax.imshow(xthVSm[i], vmin=0, vmax=1, extent=myExtent, aspect='auto',
                         cmap=xcmap)
+
+        # include critical migration with varying xth
+        if XCRIT:
+           crit_mig = compute_critical_mig(XCRIT, xTickLoc, yTickLoc)
+           ax.plot(crit_mig, colors='green')
+           ax_segIndx.plot(crit_mig, colors='green')
+
     else:
         img = ax.imshow(xthVSm[i], vmin=0, vmax=1, extent=myExtent, aspect='auto')
 
