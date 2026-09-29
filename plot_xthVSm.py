@@ -236,11 +236,11 @@ def compute_critical_mig(switchSpeed, xtickloc, ytickloc):
         values = [-1, -2, -2.5, -3, -2, -1.5, -1, -1, -1]
 
     elif switchSpeed == 'fast':
-        if DELTA == 0.75:
+        if DELTA == '0.75':
             values = [-4, 0, 0, 0, 0, 0, 0, -4.5, -2.5]
-        elif DELTA == 0:
+        elif DELTA == '0':
             values = [-2, -3, -4, -4.5, -3.5, -3, -2, -1.5, -1]
-        elif DELTA == -0.75:
+        elif DELTA == '-0.75':
             values = [-1.5, -2, -3,-3, -2, -1.5, -1, -1, -1]
         else:
             xcrit = None
@@ -251,7 +251,7 @@ def compute_critical_mig(switchSpeed, xtickloc, ytickloc):
     for i, val in enumerate(values):
         xcrit.append([xcritDict[val], ytickloc[i]])
 
-    return xcrit
+    return np.array(xcrit)
 
 ################################################ main
 # create parser
@@ -349,7 +349,7 @@ horizontalD=np.zeros((len(desiredTimeSteps),len(M),2))# 3d arr 1st column is avg
 #         dirs.append(d)
 
 '''testing'''
-print(f'L= {L}, NU= {NU}, DELTA= {DELTA}, timeStep(s)= {desiredTimeSteps}, SAVE= {SAVE}, df type= {DFTYPE}, plot type= {PLOTTYPE}')
+print(f'L= {L}, NU= {NU}, DELTA= {DELTA}, timeStep(s)= {desiredTimeSteps}, SAVE= {SAVE}, df type= {DFTYPE}, plot type= {PLOTTYPE}, XCRIT= {XCRIT}')
 print(f'xth= {XTH}')
 print(f'm= {M}')
 
@@ -533,20 +533,20 @@ for i, ts in enumerate(desiredTimeSteps):
         xcmap = LinearSegmentedColormap.from_list(mycmap_name, blackBlue)
         img = ax.imshow(xthVSm[i], vmin=0, vmax=1, extent=myExtent, aspect='auto',
                         cmap=xcmap)
-
-        # include critical migration with varying xth
-        if XCRIT:
-           crit_mig = compute_critical_mig(XCRIT, xTickLoc, yTickLoc)
-           
-           '''testing'''
-           print(f'crit_mig= {crit_mig}')
-           
-           # plot on top of heat map
-           ax.plot(crit_mig, color='green')
-           ax_segIndx.plot(crit_mig, color='green')
-
+    
     else:
         img = ax.imshow(xthVSm[i], vmin=0, vmax=1, extent=myExtent, aspect='auto')
+
+    # include critical migration with varying xth
+    if XCRIT:
+        crit_mig = compute_critical_mig(XCRIT, xTickLoc, yTickLoc)
+        
+        '''testing'''
+        print(f'crit_mig=\n{crit_mig}')
+        
+        # plot on top of heat map
+        ax.plot(crit_mig[:,0], crit_mig[:,1], color='green', linewidth=WIDTH)
+        ax_segIndx.plot(crit_mig[:,0], crit_mig[:,1], color='green', linewidth=WIDTH)
 
     # # plot theorectical prediction
     # ax.plot(xTickLoc[1:], theoBotNeck, color='green', linewidth=WIDTH+2)
@@ -636,19 +636,15 @@ for i, ts in enumerate(desiredTimeSteps):
     # detemine output file name depending on parameters
     # for simplicity, this only works if the -notl flag was included
     # doesn't consider of ticklabels or colorbar are desired
-    ofnames = []
-    if LABELS:
-        ofnames.append(f'xth/xthVSm_{DFTYPE}'+(f'-{PLOTTYPE}' if PLOTTYPE=='x' else '')+f'_L{L}_mcs{MCS}_K{K[0]}-{K[-1]}_nu{NU}_delta{DELTA}_ts{ts}.png')
-        
-        ofnames.append(f'xth/segIndex_{DFTYPE}_L{L}_mcs{MCS}_K{K[0]}-{K[-1]}_nu{NU}_delta{DELTA}_ts{ts}.png')
-    else:
-        ofnames.append(f'xth/xthVSm_{DFTYPE}'+(f'-{PLOTTYPE}' if PLOTTYPE=='x' else '')+f'_L{L}_mcs{MCS}_K{K[0]}-{K[-1]}_nu{NU}_delta{DELTA}_ts{ts}_noLabels.png')
-
-        ofnames.append(f'xth/segIndex_{DFTYPE}_L{L}_mcs{MCS}_K{K[0]}-{K[-1]}_nu{NU}_delta{DELTA}_ts{ts}_noLabels.png')
+    ofnames = [
+        f'xth/xthVSm_{DFTYPE}'+(f'-{PLOTTYPE}' if PLOTTYPE=='x' else '')+f'_L{L}_mcs{MCS}_K{K[0]}-{K[-1]}_nu{NU}_delta{DELTA}_ts{ts}{"_critMig" if XCRIT else ""}{"" if LABELS else "_noLabels"}.png',
+        f'xth/segIndex_{DFTYPE}_L{L}_mcs{MCS}_K{K[0]}-{K[-1]}_nu{NU}_delta{DELTA}_ts{ts}{"_critMig" if XCRIT else ""}{"" if LABELS else "_noLabels"}.png'
+    ]
 
     # save
     if SAVE:
-        print(f'saved {ofnames[-1]}')
+        print(f'saved {ofnames}')
+        fig.savefig(ofnames[0])
         fig_segIndx.savefig(ofnames[-1])
     else:
         print(f'showing {ofnames}')
