@@ -537,8 +537,13 @@ for i, ts in enumerate(desiredTimeSteps):
         # include critical migration with varying xth
         if XCRIT:
            crit_mig = compute_critical_mig(XCRIT, xTickLoc, yTickLoc)
-           ax.plot(crit_mig, colors='green')
-           ax_segIndx.plot(crit_mig, colors='green')
+           
+           '''testing'''
+           print(f'crit_mig= {crit_mig}')
+           
+           # plot on top of heat map
+           ax.plot(crit_mig, color='green')
+           ax_segIndx.plot(crit_mig, color='green')
 
     else:
         img = ax.imshow(xthVSm[i], vmin=0, vmax=1, extent=myExtent, aspect='auto')
